@@ -583,6 +583,7 @@ apply_gray_filter( animated_gif * image )
 
     for ( i = 0 ; i < image->n_images ; i++ )
     {
+        #pragma omp parallel for omp_set_num_threads(7) schedule(dynamic)
         for ( j = 0 ; j < image->width[i] * image->height[i] ; j++ )
         {
             int moy ;
@@ -610,9 +611,11 @@ void apply_gray_line( animated_gif * image )
     p = image->p ;
 
     for ( i = 0 ; i < image->n_images ; i++ )
-    {
+    {	
+
         for ( j = 0 ; j < 10 ; j++ )
         {
+ 	    #pragma omp parallel for omp_set_num_threads(7) schedule(dynamic)
             for ( k = image->width[i]/2 ; k < image->width[i] ; k++ )
             {
             p[i][CONV(j,k,image->width[i])].r = 0 ;
@@ -653,7 +656,7 @@ apply_blur_filter( animated_gif * image, int size, int threshold )
         {
             end = 1 ;
             n_iter++ ;
-
+	    #pragma omp parallel for omp_set_num_threads(7) schedule(dynamic)
             /* Apply blur on top part of image (10%) */
             for(j=size; j<height/10-size; j++)
             {
@@ -679,7 +682,7 @@ apply_blur_filter( animated_gif * image, int size, int threshold )
                     new[CONV(j,k,width)].b = t_b / ( (2*size+1)*(2*size+1) ) ;
                 }
             }
-
+	    #pragma omp parallel for omp_set_num_threads(7) schedule(dynamic)
             /* Copy the middle part of the image */
             for(j=height/10-size; j<height*0.9+size; j++)
             {
@@ -690,7 +693,7 @@ apply_blur_filter( animated_gif * image, int size, int threshold )
                     new[CONV(j,k,width)].b = p[i][CONV(j,k,width)].b ; 
                 }
             }
-
+	    #pragma omp parallel for omp_set_num_threads(7) schedule(dynamic)
             /* Apply blur on the bottom part of the image (10%) */
             for(j=height*0.9+size; j<height-size; j++)
             {
@@ -716,7 +719,7 @@ apply_blur_filter( animated_gif * image, int size, int threshold )
                     new[CONV(j,k,width)].b = t_b / ( (2*size+1)*(2*size+1) ) ;
                 }
             }
-
+            #pragma omp parallel for omp_set_num_threads(7) schedule(dynamic)
             for(j=1; j<height-1; j++)
             {
                 for(k=1; k<width-1; k++)
@@ -773,7 +776,7 @@ apply_sobel_filter( animated_gif * image )
         pixel * sobel ;
 
         sobel = (pixel *)malloc(width * height * sizeof( pixel ) ) ;
-	
+	#pragma omp parallel for omp_set_num_threads(7) schedule(dynamic)
         for(j=1; j<height-1; j++)
         {
             for(k=1; k<width-1; k++)
@@ -816,7 +819,7 @@ apply_sobel_filter( animated_gif * image )
                 }
             }
         }
-
+	#pragma omp parallel for omp_set_num_threads(7) schedule(dynamic)
         for(j=1; j<height-1; j++)
         {
             for(k=1; k<width-1; k++)
