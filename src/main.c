@@ -773,7 +773,7 @@ apply_sobel_filter( animated_gif * image )
         pixel * sobel ;
 
         sobel = (pixel *)malloc(width * height * sizeof( pixel ) ) ;
-
+	
         for(j=1; j<height-1; j++)
         {
             for(k=1; k<width-1; k++)
