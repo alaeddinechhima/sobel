@@ -9,6 +9,8 @@
 #include <math.h>
 #include <sys/time.h>
 
+#include <omp.h>
+
 #include <gif_lib.h>
 
 #define SOBELF_DEBUG 0
@@ -474,7 +476,7 @@ store_pixels( char * filename, animated_gif * image )
         printf( "OUTPUT: Processing image %d (total of %d images) -> %d x %d\n",
                 i, image->n_images, image->width[i], image->height[i] ) ;
 #endif
-
+	#pragma omp parallel for omp_set_num_threads(2) schedule(dynamic)
         for ( j = 0 ; j < image->width[i] * image->height[i] ; j++ ) 
         {
             int found = 0 ;
@@ -542,6 +544,7 @@ store_pixels( char * filename, animated_gif * image )
     /* Update the raster bits according to color map */
     for ( i = 0 ; i < image->n_images ; i++ )
     {
+	#pragma omp parallel for omp_set_num_threads(2) schedule(dynamic)
         for ( j = 0 ; j < image->width[i] * image->height[i] ; j++ ) 
         {
             int found_index = -1 ;
