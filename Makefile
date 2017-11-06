@@ -35,7 +35,7 @@ $(OBJ_DIR)/%.o : $(SRC_DIR)/%.c
 	$(CC) $(CFLAGS) -c -o $@ $^
 
 sobelf:$(OBJ)
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^ -fopenmp
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^ -fopenmp -pg 
 
 clean:
 	rm -f sobelf $(OBJ)
