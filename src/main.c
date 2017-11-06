@@ -645,15 +645,15 @@ __global__ void conv(pixel ** p,pixel *new,int width,int height,int size)
   {
       for ( stencil_k = -size ; stencil_k <= size ; stencil_k++ )
       {
-          t_r += p[i][CONV(j+stencil_j,k+stencil_k,width)].r ;
-          t_g += p[i][CONV(j+stencil_j,k+stencil_k,width)].g ;
-          t_b += p[i][CONV(j+stencil_j,k+stencil_k,width)].b ;
+          t_r += p[i][CONV(x+stencil_j,y+stencil_k,width)].r ;
+          t_g += p[i][CONV(x+stencil_j,y+stencil_k,width)].g ;
+          t_b += p[i][CONV(x+stencil_j,y+stencil_k,width)].b ;
       }
   }
 
-  new[CONV(j,k,width)].r = t_r / ( (2*size+1)*(2*size+1) ) ;
-  new[CONV(j,k,width)].g = t_g / ( (2*size+1)*(2*size+1) ) ;
-  new[CONV(j,k,width)].b = t_b / ( (2*size+1)*(2*size+1) ) ;
+  new[CONV(x,y,width)].r = t_r / ( (2*size+1)*(2*size+1) ) ;
+  new[CONV(x,y,width)].g = t_g / ( (2*size+1)*(2*size+1) ) ;
+  new[CONV(x,y,width)].b = t_b / ( (2*size+1)*(2*size+1) ) ;
 
 
 }
