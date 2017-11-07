@@ -650,71 +650,107 @@ apply_blur_filter( animated_gif * image, int size, int threshold )
 
         /* Perform at least one blur iteration */
         do
-        {
-            end = 1 ;
+        {   
+	    end = 1 ;
             n_iter++ ;
+	    int rank , size , tag , i , ierr ;
+	    int iProc , dataSize ;
+  	    double data[ N ] ;
+  	    MPI_Status status ;
+	    ierr = MPI_Init( &argc , &argv ) ;
+  	    ierr = MPI_Comm_rank( MPI_COMM_WORLD , &rank ) ;
+  	    ierr = MPI_Comm_size( MPI_COMM_WORLD , &size ) ;
+	     if ( rank == 0 ){
+    			tag = 1515 ;
+    			dataSize = N ;
+    			ierr = MPI_Send( data+((iProc-1)*dataSize)/4 , dataSize/4 , MPI_DOUBLE_PRECISION , 1 , tag , MPI_COMM_WORLD ) ;
+			ierr = MPI_Send( data+((iProc-1)*dataSize)/4 , dataSize/4 , MPI_DOUBLE_PRECISION , 2 , tag , MPI_COMM_WORLD ) ;
 
-            /* Apply blur on top part of image (10%) */
-            for(j=size; j<height/10-size; j++)
-            {
-                for(k=size; k<width-size; k++)
-                {
-                    int stencil_j, stencil_k ;
-                    int t_r = 0 ;
-                    int t_g = 0 ;
-                    int t_b = 0 ;
+			/* Copy the middle part of the image */
+            		for(j=height/10-size; j<height*0.9+size; j++)
+            		{
+                		for(k=size; k<width-size; k++)
+                		{
+                    			new[CONV(j,k,width)].r = p[i][CONV(j,k,width)].r ; 
+                    			new[CONV(j,k,width)].g = p[i][CONV(j,k,width)].g ; 
+                    			new[CONV(j,k,width)].b = p[i][CONV(j,k,width)].b ; 
+                		}
+            		}
 
-                    for ( stencil_j = -size ; stencil_j <= size ; stencil_j++ )
-                    {
-                        for ( stencil_k = -size ; stencil_k <= size ; stencil_k++ )
-                        {
-                            t_r += p[i][CONV(j+stencil_j,k+stencil_k,width)].r ;
-                            t_g += p[i][CONV(j+stencil_j,k+stencil_k,width)].g ;
-                            t_b += p[i][CONV(j+stencil_j,k+stencil_k,width)].b ;
-                        }
-                    }
+  			ierr = MPI_Recv( data+((iProc-1)*dataSize)/4 , dataSize , MPI_DOUBLE_PRECISION , 1 , MPI_ANY_TAG , MPI_COMM_WORLD , &status ) ;
+			ierr = MPI_Recv( data+((iProc-1)*dataSize)/4 , dataSize , MPI_DOUBLE_PRECISION , 2 , MPI_ANY_TAG , MPI_COMM_WORLD , &status ) ;
+      			}
+           
+	    if (rank==1){
+		MPI_Probe(0,1515,MPI_COMM_WORLD,&status) ;
+    		MPI_Get_count(&status,MPI_DOUBLE_PRECISION,&dataSize);
+    		printf("datasize = %d \n",dataSize);
+		double * data=(double *)malloc(dataSize*sizeof(double*)) ;
+    		ierr = MPI_Recv( data , dataSize , MPI_DOUBLE_PRECISION , MPI_ANY_SOURCE , MPI_ANY_TAG , MPI_COMM_WORLD , &status ) ;            	
+		/* Apply blur on top part of image (10%) */
+            	for(j=size; j<height/10-size; j++)
+            	{
+                	for(k=size; k<width-size; k++)
+                	{
+                    	int stencil_j, stencil_k ;
+                    	int t_r = 0 ;
+                    	int t_g = 0 ;
+                    	int t_b = 0 ;
 
-                    new[CONV(j,k,width)].r = t_r / ( (2*size+1)*(2*size+1) ) ;
-                    new[CONV(j,k,width)].g = t_g / ( (2*size+1)*(2*size+1) ) ;
-                    new[CONV(j,k,width)].b = t_b / ( (2*size+1)*(2*size+1) ) ;
+                    	for ( stencil_j = -size ; stencil_j <= size ; stencil_j++ )
+                    	{
+                        	for ( stencil_k = -size ; stencil_k <= size ; stencil_k++ )
+                        	{
+                            	t_r += p[i][CONV(j+stencil_j,k+stencil_k,width)].r ;
+                            	t_g += p[i][CONV(j+stencil_j,k+stencil_k,width)].g ;
+                            	t_b += p[i][CONV(j+stencil_j,k+stencil_k,width)].b ;
+                        	}
+                    	}
+
+                    	new[CONV(j,k,width)].r = t_r / ( (2*size+1)*(2*size+1) ) ;
+                    	new[CONV(j,k,width)].g = t_g / ( (2*size+1)*(2*size+1) ) ;
+                    	new[CONV(j,k,width)].b = t_b / ( (2*size+1)*(2*size+1) ) ;
+                	}
+            	}
+		tag = 1789 ;
+    		ierr = MPI_Send( data , dataSize , MPI_DOUBLE_PRECISION , 0 , tag , MPI_COMM_WORLD ) ;
+
+		}
+	   
+            
+	    
+            if(rank==2){
+		MPI_Probe(0,1515,MPI_COMM_WORLD,&status) ;
+    		MPI_Get_count(&status,MPI_DOUBLE_PRECISION,&dataSize);
+    		printf("datasize = %d \n",dataSize);
+    		double * data=(double *)malloc(dataSize*sizeof(double*)) ;
+    		ierr = MPI_Recv( data , dataSize , MPI_DOUBLE_PRECISION , MPI_ANY_SOURCE , MPI_ANY_TAG , MPI_COMM_WORLD , &status ) ;
+            	/* Apply blur on the bottom part of the image (10%) */
+            	for(j=height*0.9+size; j<height-size; j++)
+            	{
+                	for(k=size; k<width-size; k++)
+                	{
+                	    int stencil_j, stencil_k ;
+                	    int t_r = 0 ;
+                	    int t_g = 0 ;
+                	    int t_b = 0 ;
+
+                        for ( stencil_j = -size ; stencil_j <= size ; stencil_j++ )
+                    	{
+                        	for ( stencil_k = -size ; stencil_k <= size ; stencil_k++ )
+                        	{
+                            		t_r += p[i][CONV(j+stencil_j,k+stencil_k,width)].r ;
+                            		t_g += p[i][CONV(j+stencil_j,k+stencil_k,width)].g ;
+                            		t_b += p[i][CONV(j+stencil_j,k+stencil_k,width)].b ;
+                        	}
+                    	}
+
+                    	new[CONV(j,k,width)].r = t_r / ( (2*size+1)*(2*size+1) ) ;
+                    	new[CONV(j,k,width)].g = t_g / ( (2*size+1)*(2*size+1) ) ;
+                    	new[CONV(j,k,width)].b = t_b / ( (2*size+1)*(2*size+1) ) ;
                 }
-            }
-
-            /* Copy the middle part of the image */
-            for(j=height/10-size; j<height*0.9+size; j++)
-            {
-                for(k=size; k<width-size; k++)
-                {
-                    new[CONV(j,k,width)].r = p[i][CONV(j,k,width)].r ; 
-                    new[CONV(j,k,width)].g = p[i][CONV(j,k,width)].g ; 
-                    new[CONV(j,k,width)].b = p[i][CONV(j,k,width)].b ; 
-                }
-            }
-
-            /* Apply blur on the bottom part of the image (10%) */
-            for(j=height*0.9+size; j<height-size; j++)
-            {
-                for(k=size; k<width-size; k++)
-                {
-                    int stencil_j, stencil_k ;
-                    int t_r = 0 ;
-                    int t_g = 0 ;
-                    int t_b = 0 ;
-
-                    for ( stencil_j = -size ; stencil_j <= size ; stencil_j++ )
-                    {
-                        for ( stencil_k = -size ; stencil_k <= size ; stencil_k++ )
-                        {
-                            t_r += p[i][CONV(j+stencil_j,k+stencil_k,width)].r ;
-                            t_g += p[i][CONV(j+stencil_j,k+stencil_k,width)].g ;
-                            t_b += p[i][CONV(j+stencil_j,k+stencil_k,width)].b ;
-                        }
-                    }
-
-                    new[CONV(j,k,width)].r = t_r / ( (2*size+1)*(2*size+1) ) ;
-                    new[CONV(j,k,width)].g = t_g / ( (2*size+1)*(2*size+1) ) ;
-                    new[CONV(j,k,width)].b = t_b / ( (2*size+1)*(2*size+1) ) ;
-                }
+		tag = 1789 ;
+    		ierr = MPI_Send( data , dataSize , MPI_DOUBLE_PRECISION , 0 , tag , MPI_COMM_WORLD ) ;
             }
 
             for(j=1; j<height-1; j++)
