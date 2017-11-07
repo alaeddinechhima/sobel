@@ -672,13 +672,18 @@ apply_blur_filter( animated_gif * image, int size, int threshold )
     /* Get the pixels of all images */
     p = image->p ;
 
-
+    int size_gpu;cudaMemcpy(size_gpu,size,sizeof(int),cudaMemcpyHostToDevice);
     /* Process all images */
     for ( i = 0 ; i < image->n_images ; i++ )
     {
         n_iter = 0 ;
         width = image->width[i] ;
         height = image->height[i] ;
+        dim3 blockD(32, 32);
+        dim3 gridD((width + blockD.x - 1) / blockD.x, (height + blockD.y - 1) / blockD.y);
+
+        int width_gpu;cudaMemcpy(width_gpu,width,sizeof(int),cudaMemcpyHostToDevice);
+        int height_gpu;cudaMemcpy(height_gpu,height,sizeof(int),cudaMemcpyHostToDevice);
 
         /* Allocate array of new pixels */
         new = (pixel *)malloc(width * height * sizeof( pixel ) ) ;
@@ -695,7 +700,7 @@ apply_blur_filter( animated_gif * image, int size, int threshold )
             n_iter++ ;
 
             /* Apply blur on top part of image (10%) */
-            conv<<<1024, 256>>>(p_gpu,new_gpu, width,height,size);
+            conv<<<blockD, gridD>>>(p_gpu,new_gpu, width_gpu,height_gpu,size_gpu);
 
 
             cudaMemcpy(p[i],p_gpu,size_new,cudaMemcpyDeviceToHost);
@@ -733,7 +738,8 @@ apply_blur_filter( animated_gif * image, int size, int threshold )
         while ( threshold > 0 && !end ) ;
 
         // printf( "Nb iter for image %d\n", n_iter ) ;
-        cudaFree(p_gpu); cudaFree(new_gpu);
+        cudaFree(p_gpu); cudaFree(new_gpu);cudaFree(height_gpu);
+        cudaFree(width_gpu);cudaFree(size_gpu);
 
         free (new) ;
     }
