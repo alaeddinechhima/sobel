@@ -47,7 +47,7 @@ load_pixels( char * filename )
     int * height ;
     pixel ** p ;
     int i ;
-    animated_gif * #include "mpi.h"image ;
+    animated_gif * image ;
 
     /* Open the GIF image (read mode) */
     g = DGifOpenFileName( filename, &error ) ;
@@ -638,7 +638,7 @@ apply_blur_filter( animated_gif * image, int size, int threshold )
     pixel pix;
    
     int disp[3];
-    MPI_Get_address(pix,disp);
+    MPI_Get_address(&pix,disp);
     MPI_Get_address(pix.g,disp+1);
     MPI_Get_address(pix.b,disp+2);
     int blocklen[3] = { 1, 1,1};
@@ -681,6 +681,7 @@ threshold=20;
       ierr = MPI_Recv( p1 ,  width1*height1, Particlestruct, 0 , MPI_ANY_TAG ,      
       MPI_COMM_WORLD , &status ) ;
         n_iter = 0 ;
+	int size1=5; 	
       /* Perform at least one blur iteration */
         do
         {
@@ -701,9 +702,9 @@ threshold=20;
                     {
                         for ( stencil_k = -size1 ; stencil_k <= size1 ; stencil_k++ )
                         {
-                            t_r += p1[i][CONV(j+stencil_j,k+stencil_k,width1)].r ;
-                            t_g += p1[i][CONV(j+stencil_j,k+stencil_k,width1)].g ;
-                            t_b += p1[i][CONV(j+stencil_j,k+stencil_k,width1)].b ;
+                            t_r += p1[CONV(j+stencil_j,k+stencil_k,width1)].r ;
+                            t_g += p1[CONV(j+stencil_j,k+stencil_k,width1)].g ;
+                            t_b += p1[CONV(j+stencil_j,k+stencil_k,width1)].b ;
                         }
                     }
 
@@ -718,9 +719,9 @@ threshold=20;
             {
                 for(k=size1; k<width1-size1; k++)
                 {
-                    new1[CONV(j,k,width1)].r = p1[i][CONV(j,k,width1)].r ; 
-                    new1[CONV(j,k,width1)].g = p1[i][CONV(j,k,width1)].g ; 
-                    new1[CONV(j,k,width1)].b = p1[i][CONV(j,k,width1)].b ; 
+                    new1[CONV(j,k,width1)].r = p1[CONV(j,k,width1)].r ; 
+                    new1[CONV(j,k,width1)].g = p1[CONV(j,k,width1)].g ; 
+                    new1[CONV(j,k,width1)].b = p1[CONV(j,k,width1)].b ; 
                 }
             }
 
@@ -738,9 +739,9 @@ threshold=20;
                     {
                         for ( stencil_k = -size1 ; stencil_k <= size1 ; stencil_k++ )
                         {
-                            t_r += p1[i][CONV(j+stencil_j,k+stencil_k,width1)].r ;
-                            t_g += p1[i][CONV(j+stencil_j,k+stencil_k,width1)].g ;
-                            t_b += p1[i][CONV(j+stencil_j,k+stencil_k,width1)].b ;
+                            t_r += p1[CONV(j+stencil_j,k+stencil_k,width1)].r ;
+                            t_g += p1[CONV(j+stencil_j,k+stencil_k,width1)].g ;
+                            t_b += p1[CONV(j+stencil_j,k+stencil_k,width1)].b ;
                         }
                     }
 
@@ -759,9 +760,9 @@ threshold=20;
                     float diff_g ;
                     float diff_b ;
 
-                    diff_r = (new1[CONV(j  ,k  ,width1)].r - p1[i][CONV(j  ,k  ,width1)].r) ;
-                    diff_g = (new1[CONV(j  ,k  ,width1)].g - p1[i][CONV(j  ,k  ,width1)].g) ;
-                    diff_b = (new1[CONV(j  ,k  ,width1)].b - p1[i][CONV(j  ,k  ,width1)].b) ;
+                    diff_r = (new1[CONV(j  ,k  ,width1)].r - p1[CONV(j  ,k  ,width1)].r) ;
+                    diff_g = (new1[CONV(j  ,k  ,width1)].g - p1[CONV(j  ,k  ,width1)].g) ;
+                    diff_b = (new1[CONV(j  ,k  ,width1)].b - p1[CONV(j  ,k  ,width1)].b) ;
 
                     if ( diff_r > threshold || -diff_r > threshold 
                             ||
@@ -772,9 +773,9 @@ threshold=20;
                         end = 0 ;
                     }
 
-                    p1[i][CONV(j  ,k  ,width1)].r = new1[CONV(j  ,k  ,width1)].r ;
-                    p1[i][CONV(j  ,k  ,width1)].g = new1[CONV(j  ,k  ,width1)].g ;
-                    p1[i][CONV(j  ,k  ,width1)].b = new1[CONV(j  ,k  ,width1)].b ;
+                    p1[CONV(j  ,k  ,width1)].r = new1[CONV(j  ,k  ,width1)].r ;
+                    p1[CONV(j  ,k  ,width1)].g = new1[CONV(j  ,k  ,width1)].g ;
+                    p1[CONV(j  ,k  ,width1)].b = new1[CONV(j  ,k  ,width1)].b ;
                 }
             }
 
