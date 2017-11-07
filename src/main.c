@@ -631,7 +631,7 @@ void apply_gray_line( animated_gif * image )
 }
 
 
-__global__ void conv(pixel ** p,pixel *new,int width,int height,int size)
+__global__ void conv(pixel * p,pixel *new,int width,int height,int size)
 {
 
   x = threadIdx.x+blockIdx.x*BLOCK_SIZE;
@@ -645,9 +645,9 @@ __global__ void conv(pixel ** p,pixel *new,int width,int height,int size)
   {
       for ( stencil_k = -size ; stencil_k <= size ; stencil_k++ )
       {
-          t_r += p[i][CONV(x+stencil_j,y+stencil_k,width)].r ;
-          t_g += p[i][CONV(x+stencil_j,y+stencil_k,width)].g ;
-          t_b += p[i][CONV(x+stencil_j,y+stencil_k,width)].b ;
+          t_r += p[CONV(x+stencil_j,y+stencil_k,width)].r ;
+          t_g += p[CONV(x+stencil_j,y+stencil_k,width)].g ;
+          t_b += p[CONV(x+stencil_j,y+stencil_k,width)].b ;
       }
   }
 
@@ -682,13 +682,12 @@ apply_blur_filter( animated_gif * image, int size, int threshold )
 
         /* Allocate array of new pixels */
         new = (pixel *)malloc(width * height * sizeof( pixel ) ) ;
-        size_p=width * height * sizeof( pixel )*image->n_images ;
         size_new=width * height * sizeof( pixel ) ;
         /* Perform at least one blur iteration */
-        pixel ** p_gpu; cudaMalloc(&p_gpu,size_p);
+        pixel * p_gpu; cudaMalloc(&p_gpu,size_new);
         pixel * new_gpu; cudaMalloc(&new_gpu,size_new);
 
-        cudaMemcpy(p_gpu,p,size_p,cudaMemcpyHostToDevice);
+        cudaMemcpy(p_gpu,p[i],size_new,cudaMemcpyHostToDevice);
         cudaMemcpy(new_gpu,new,size_new,cudaMemcpyHostToDevice);
         do
         {
@@ -699,7 +698,7 @@ apply_blur_filter( animated_gif * image, int size, int threshold )
             conv<<<1024, 256>>>(p_gpu,new_gpu, width,height,size);
 
 
-            cudaMemcpy(p,p_gpu,size_p,cudaMemcpyDeviceToHost);
+            cudaMemcpy(p[i],p_gpu,size_new,cudaMemcpyDeviceToHost);
             cudaMemcpy(new,new_gpu,size_new,cudaMemcpyDeviceToHost);
             //#pragma omp parallel for omp_set_num_threads(7) schedule(dynamic)
             for(j=1; j<height-1; j++)
