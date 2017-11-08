@@ -632,31 +632,30 @@ void apply_gray_line( animated_gif * image )
 }
 
 
-__global__ void conv(pixel * p,pixel *new,int width,int height,int size)
-{
+__global__ void blur(pixel * p,pixel *new,int width,int height,int size) {
+    int i, j;
+    i = blockIdx.x * blockDim.x + threadIdx.x;
+    j = blockIdx.y * blockDim.y + threadIdx.y;
+	int stencil_j, stencil_k ;
+		int t_r = 0 ;
+  		int t_g = 0 ;
+  		int t_b = 0 ;
 
-  x = threadIdx.x+blockIdx.x*BLOCK_SIZE;
-  y = threadIdx.y+blockIdx.y*BLOCK_SIZE;
-  int stencil_j, stencil_k ;
-  int t_r = 0 ;
-  int t_g = 0 ;
-  int t_b = 0 ;
+		for ( stencil_j = -size ; stencil_j <= size ; stencil_j++) {
 
-  for ( stencil_j = -size ; stencil_j <= size ; stencil_j++ )
-  {
-      for ( stencil_k = -size ; stencil_k <= size ; stencil_k++ )
-      {
-          t_r += p[CONV(x+stencil_j,y+stencil_k,width)].r ;
-          t_g += p[CONV(x+stencil_j,y+stencil_k,width)].g ;
-          t_b += p[CONV(x+stencil_j,y+stencil_k,width)].b ;
-      }
-  }
+			for (stencil_k = -size ; stencil_k <= size ; stencil_k++) {
+				if (stencil_k >= 0 && stencil_k < width && stencil_j >= 0 && stencil_j < height) {
+					t_r += p[CONV(i+stencil_j,y+stencil_k,width)].r ;
+          				t_g += p[CONV(i+stencil_j,y+stencil_k,width)].g ;
+          				t_b += p[CONV(i+stencil_j,y+stencil_k,width)].b ;
+					num++;
+				}
+			}
 
-  new[CONV(x,y,width)].r = t_r / ( (2*size+1)*(2*size+1) ) ;
-  new[CONV(x,y,width)].g = t_g / ( (2*size+1)*(2*size+1) ) ;
-  new[CONV(x,y,width)].b = t_b / ( (2*size+1)*(2*size+1) ) ;
-
-
+		new[CONV(i,j,width)].r = t_r / ( (2*size+1)*(2*size+1) ) ;
+  		new[CONV(i,j,width)].g = t_g / ( (2*size+1)*(2*size+1) ) ;
+  		new[CONV(i,j,width)].b = t_b / ( (2*size+1)*(2*size+1) ) ;
+	}
 }
 
 void
@@ -704,7 +703,7 @@ apply_blur_filter( animated_gif * image, int size, int threshold )
             conv<<<blockD, gridD>>>(p_gpu,new_gpu, width_gpu,height_gpu,size_gpu);
 
 
-            cudaMemcpy(p[i],p_gpu,size_new,cudaMemcpyDeviceToHost);
+            //cudaMemcpy(p[i],p_gpu,size_new,cudaMemcpyDeviceToHost);
             cudaMemcpy(new,new_gpu,size_new,cudaMemcpyDeviceToHost);
             //#pragma omp parallel for omp_set_num_threads(7) schedule(dynamic)
             for(j=1; j<height-1; j++)
