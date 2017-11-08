@@ -688,7 +688,7 @@ apply_blur_filter( animated_gif * image, int size, int threshold )
 
         ierr = MPI_Send(p[i],height*width, mpixel, dest , tag , MPI_COMM_WORLD ) ;
 
-          printf("sended %d\n",p[i][6].r  );
+          printf("sended %d\n",p[i][5].r  );
 
 
 
@@ -709,8 +709,8 @@ apply_blur_filter( animated_gif * image, int size, int threshold )
 
         int dataSize ;
         threshold=20;
-        int height1=7016;
-        int width1=9933;
+        int height1=500;
+        int width1=500;
 
 
 
@@ -719,13 +719,13 @@ apply_blur_filter( animated_gif * image, int size, int threshold )
           printf("datasize = %d \n",dataSize);
           pixel * p1 = (pixel *)malloc(dataSize * sizeof( pixel) ) ;
           //double * data=(double *)malloc(dataSize*sizeof(double*)) ;
-        ierr = MPI_Recv(p1 ,dataSize ,mpixel, 0 , MPI_ANY_TAG , MPI_COMM_WORLD, &status ) ;
+        ierr = MPI_Recv(p[0] ,dataSize ,mpixel, 0 , MPI_ANY_TAG , MPI_COMM_WORLD, &status ) ;
         //ierr = MPI_Recv(new ,1 ,mpixel, 0 , MPI_ANY_TAG , MPI_COMM_WORLD , MPI_STATUS_IGNORE ) ;
-
-        printf("recv %d\n",p1[6].r  );
+        p1=p[0];
+        printf("recv %d\n",p1[5].r  );
         n_iter = 0 ;
 	      int size1=5;
-
+        new=p1 ;
       /* Perform at least one blur iteration */
         do
         {
@@ -752,11 +752,11 @@ apply_blur_filter( animated_gif * image, int size, int threshold )
                             //printf("%d\n",p[0][CONV(j+stencil_j,k+stencil_k,width1)].r );
                         }
                     }
-                    printf("%d\n",new[0].r );
-                    printf("aaaaa\n" );
-                    //new[CONV(j,k,width)].r = t_r / ( (2*size+1)*(2*size+1) ) ;
-                    //new[CONV(j,k,width)].g = t_g / ( (2*size+1)*(2*size+1) ) ;
-                    //new[CONV(j,k,width)].b = t_b / ( (2*size+1)*(2*size+1) ) ;
+                    //printf("%d\n",new[0].r );
+                    //printf("aaaaa\n" );
+                    new[CONV(j,k,width)].r = t_r / ( (2*size+1)*(2*size+1) ) ;
+                    new[CONV(j,k,width)].g = t_g / ( (2*size+1)*(2*size+1) ) ;
+                    new[CONV(j,k,width)].b = t_b / ( (2*size+1)*(2*size+1) ) ;
                 }
             }
 
