@@ -37,7 +37,7 @@ typedef struct animated_gif
  * structure of type animated_gif.
  */
 animated_gif *
-load_pixels( char * filename ) 
+load_pixels( char * filename )
 {
     GifFileType * g ;
     ColorMapObject * colmap ;
@@ -51,7 +51,7 @@ load_pixels( char * filename )
 
     /* Open the GIF image (read mode) */
     g = DGifOpenFileName( filename, &error ) ;
-    if ( g == NULL ) 
+    if ( g == NULL )
     {
         fprintf( stderr, "Error DGifOpenFileName %s\n", filename ) ;
         return NULL ;
@@ -61,7 +61,7 @@ load_pixels( char * filename )
     error = DGifSlurp( g ) ;
     if ( error != GIF_OK )
     {
-        fprintf( stderr, 
+        fprintf( stderr,
                 "Error DGifSlurp: %d <%s>\n", error, GifErrorString(g->Error) ) ;
         return NULL ;
     }
@@ -86,14 +86,14 @@ load_pixels( char * filename )
     }
 
     /* Fill the width and height */
-    for ( i = 0 ; i < n_images ; i++ ) 
+    for ( i = 0 ; i < n_images ; i++ )
     {
         width[i] = g->SavedImages[i].ImageDesc.Width ;
         height[i] = g->SavedImages[i].ImageDesc.Height ;
 
 #if SOBELF_DEBUG
         printf( "Image %d: l:%d t:%d w:%d h:%d interlace:%d localCM:%p\n",
-                i, 
+                i,
                 g->SavedImages[i].ImageDesc.Left,
                 g->SavedImages[i].ImageDesc.Top,
                 g->SavedImages[i].ImageDesc.Width,
@@ -107,7 +107,7 @@ load_pixels( char * filename )
 
     /* Get the global colormap */
     colmap = g->SColorMap ;
-    if ( colmap == NULL ) 
+    if ( colmap == NULL )
     {
         fprintf( stderr, "Error global colormap is NULL\n" ) ;
         return NULL ;
@@ -130,7 +130,7 @@ load_pixels( char * filename )
         return NULL ;
     }
 
-    for ( i = 0 ; i < n_images ; i++ ) 
+    for ( i = 0 ; i < n_images ; i++ )
     {
         p[i] = (pixel *)malloc( width[i] * height[i] * sizeof( pixel ) ) ;
         if ( p[i] == NULL )
@@ -140,7 +140,7 @@ load_pixels( char * filename )
         return NULL ;
         }
     }
-    
+
     /* Fill pixels */
 
     /* For each image */
@@ -160,7 +160,7 @@ load_pixels( char * filename )
         }
 
         /* Traverse the image and fill pixels */
-        for ( j = 0 ; j < width[i] * height[i] ; j++ ) 
+        for ( j = 0 ; j < width[i] * height[i] ; j++ )
         {
             int c ;
 
@@ -174,7 +174,7 @@ load_pixels( char * filename )
 
     /* Allocate image info */
     image = (animated_gif *)malloc( sizeof(animated_gif) ) ;
-    if ( image == NULL ) 
+    if ( image == NULL )
     {
         fprintf( stderr, "Unable to allocate memory for animated_gif\n" ) ;
         return NULL ;
@@ -195,8 +195,8 @@ load_pixels( char * filename )
     return image ;
 }
 
-int 
-output_modified_read_gif( char * filename, GifFileType * g ) 
+int
+output_modified_read_gif( char * filename, GifFileType * g )
 {
     GifFileType * g2 ;
     int error2 ;
@@ -225,9 +225,9 @@ output_modified_read_gif( char * filename, GifFileType * g )
     g2->ExtensionBlocks = g->ExtensionBlocks ;
 
     error2 = EGifSpew( g2 ) ;
-    if ( error2 != GIF_OK ) 
+    if ( error2 != GIF_OK )
     {
-        fprintf( stderr, "Error after writing g2: %d <%s>\n", 
+        fprintf( stderr, "Error after writing g2: %d <%s>\n",
                 error2, GifErrorString(g2->Error) ) ;
         return 0 ;
     }
@@ -246,7 +246,7 @@ store_pixels( char * filename, animated_gif * image )
 
     /* Initialize the new set of colors */
     colormap = (GifColorType *)malloc( 256 * sizeof( GifColorType ) ) ;
-    if ( colormap == NULL ) 
+    if ( colormap == NULL )
     {
         fprintf( stderr,
                 "Unable to allocate 256 colors\n" ) ;
@@ -254,7 +254,7 @@ store_pixels( char * filename, animated_gif * image )
     }
 
     /* Everything is white by default */
-    for ( i = 0 ; i < 256 ; i++ ) 
+    for ( i = 0 ; i < 256 ; i++ )
     {
         colormap[i].Red = 255 ;
         colormap[i].Green = 255 ;
@@ -305,7 +305,7 @@ store_pixels( char * filename, animated_gif * image )
 
                 int found = -1 ;
 
-                moy = 
+                moy =
                     (
                      image->g->SColorMap->Colors[ tr_color ].Red
                      +
@@ -327,7 +327,7 @@ store_pixels( char * filename, animated_gif * image )
 
                 for ( k = 0 ; k < n_colors ; k++ )
                 {
-                    if ( 
+                    if (
                             moy == colormap[k].Red
                             &&
                             moy == colormap[k].Green
@@ -338,11 +338,11 @@ store_pixels( char * filename, animated_gif * image )
                         found = k ;
                     }
                 }
-                if ( found == -1  ) 
+                if ( found == -1  )
                 {
-                    if ( n_colors >= 256 ) 
+                    if ( n_colors >= 256 )
                     {
-                        fprintf( stderr, 
+                        fprintf( stderr,
                                 "Error: Found too many colors inside the image\n"
                                ) ;
                         return 0 ;
@@ -390,7 +390,7 @@ store_pixels( char * filename, animated_gif * image )
 
                     int found = -1 ;
 
-                    moy = 
+                    moy =
                         (
                          image->g->SColorMap->Colors[ tr_color ].Red
                          +
@@ -412,7 +412,7 @@ store_pixels( char * filename, animated_gif * image )
 
                     for ( k = 0 ; k < n_colors ; k++ )
                     {
-                        if ( 
+                        if (
                                 moy == colormap[k].Red
                                 &&
                                 moy == colormap[k].Green
@@ -423,11 +423,11 @@ store_pixels( char * filename, animated_gif * image )
                             found = k ;
                         }
                     }
-                    if ( found == -1  ) 
+                    if ( found == -1  )
                     {
-                        if ( n_colors >= 256 ) 
+                        if ( n_colors >= 256 )
                         {
-                            fprintf( stderr, 
+                            fprintf( stderr,
                                     "Error: Found too many colors inside the image\n"
                                    ) ;
                             return 0 ;
@@ -475,7 +475,7 @@ store_pixels( char * filename, animated_gif * image )
                 i, image->n_images, image->width[i], image->height[i] ) ;
 #endif
 
-        for ( j = 0 ; j < image->width[i] * image->height[i] ; j++ ) 
+        for ( j = 0 ; j < image->width[i] * image->height[i] ; j++ )
         {
             int found = 0 ;
             for ( k = 0 ; k < n_colors ; k++ )
@@ -488,11 +488,11 @@ store_pixels( char * filename, animated_gif * image )
                 }
             }
 
-            if ( found == 0 ) 
+            if ( found == 0 )
             {
-                if ( n_colors >= 256 ) 
+                if ( n_colors >= 256 )
                 {
-                    fprintf( stderr, 
+                    fprintf( stderr,
                             "Error: Found too many colors inside the image\n"
                            ) ;
                     return 0 ;
@@ -542,20 +542,20 @@ store_pixels( char * filename, animated_gif * image )
     /* Update the raster bits according to color map */
     for ( i = 0 ; i < image->n_images ; i++ )
     {
-        for ( j = 0 ; j < image->width[i] * image->height[i] ; j++ ) 
+        for ( j = 0 ; j < image->width[i] * image->height[i] ; j++ )
         {
             int found_index = -1 ;
-            for ( k = 0 ; k < n_colors ; k++ ) 
+            for ( k = 0 ; k < n_colors ; k++ )
             {
                 if ( p[i][j].r == image->g->SColorMap->Colors[k].Red &&
                         p[i][j].g == image->g->SColorMap->Colors[k].Green &&
-                        p[i][j].b == image->g->SColorMap->Colors[k].Blue )
+                        p[i][j].b == image->g->SColorMap->Colors[k].Blue)
                 {
                     found_index = k ;
                 }
             }
 
-            if ( found_index == -1 ) 
+            if ( found_index == -1 )
             {
                 fprintf( stderr,
                         "Error: Unable to find a pixel in the color map\n" ) ;
@@ -602,7 +602,7 @@ apply_gray_filter( animated_gif * image )
 #define CONV(l,c,nb_c) \
     (l)*(nb_c)+(c)
 
-void apply_gray_line( animated_gif * image ) 
+void apply_gray_line( animated_gif * image )
 {
     int i, j, k ;
     pixel ** p ;
@@ -623,65 +623,109 @@ void apply_gray_line( animated_gif * image )
     }
 }
 
+/*
+ * Create a MPI datatype of a pixel.
+ */
+int
+mpi_pixel_init(MPI_Datatype *mpi_pixel)
+{
+    pixel pixel1;        /* instance of structure */
+    int i = 0;                   /* temporary loop indexer */
+    int count = 3;               /* number of blocks in the struct */
+    int blocks[3] = {1, 1, 1};   /* set up 3 blocks */
+    MPI_Datatype types[3] = {    /* pixel internal types */
+            MPI_UNSIGNED_CHAR,
+            MPI_UNSIGNED_CHAR,
+            MPI_UNSIGNED_CHAR
+    };
+    MPI_Aint dis[3] = {          /* internal displacements */
+            offsetof(pixel, r),
+            offsetof(pixel, g),
+            offsetof(pixel, b)
+    };
+
+    MPI_Type_create_struct(count, blocks, dis, types, mpi_pixel);
+    MPI_Type_commit(mpi_pixel);
+
+    return(1);
+}
+
+
+
 void
 apply_blur_filter( animated_gif * image, int size, int threshold )
 {
     int i, j, k ;
-    int width, height,status ;
+    int width, height ;
+    MPI_Status status ;
     int end = 0 ;
     int n_iter = 0 ;
     int ierr,tag=1,rank,sizeP;
     pixel ** p ;
     pixel * new ;
-    MPI_Datatype Particlestruct;
-    MPI_Datatype type[3] = {MPI_INT, MPI_INT, MPI_INT}; 
-    pixel pix;
-   
-    int disp[3];
-    MPI_Get_address(&pix,disp);
-    MPI_Get_address(pix.g,disp+1);
-    MPI_Get_address(pix.b,disp+2);
-    int blocklen[3] = { 1, 1,1};
-    MPI_Type_create_struct(3,blocklen,disp,type,&Particlestruct);
-    MPI_Type_commit(&Particlestruct);
-      ierr = MPI_Comm_rank( MPI_COMM_WORLD , &rank ) ;
-  ierr = MPI_Comm_size( MPI_COMM_WORLD , &sizeP ) ;
+    MPI_Datatype mpixel;      /* 2D array of pixels */
+    MPI_Datatype cmpixel;      /* row/contiguous pixels */
+    MPI_Datatype ampixel;      /* 2D array of pixels */
+
+    mpi_pixel_init(&mpixel);
+
+
+   ierr = MPI_Comm_rank( MPI_COMM_WORLD , &rank ) ;
+   ierr = MPI_Comm_size( MPI_COMM_WORLD , &sizeP ) ;
    /* Get the pixels of all images */
     p = image->p ;
-
     if(rank==0)
     {
-     int dest=rank; 
-    /* Process aeightll images */
-    for ( i = 0 ; i < image->n_images ; i++ )
-    {
+      int dest=rank;
+      /* Process aeightll images */
+      for ( i = 0 ; i < image->n_images ; i++ )
+      {
         dest=(dest+1)%sizeP;
         width = image->width[i] ;
         height = image->height[i] ;
-        ierr = MPI_Send(p[i]  , width*height , Particlestruct, dest , tag , MPI_COMM_WORLD ) ;
+        /* Create a 1D array (contiguous) pixels */
+
+
+        ierr = MPI_Send(p[i],height*width, mpixel, dest , tag , MPI_COMM_WORLD ) ;
+
+          printf("sended %d\n",p[i][6].r  );
+
+
+
      }
    /* Allocate array of new pixels */
-        new = (pixel *)malloc(width * height * sizeof( pixel ) ) ;
+    new = (pixel *)malloc(height*width * sizeof( pixel ) ) ;
+
     for ( i = 0 ; i < image->n_images ; i++ )
      {
-      ierr = MPI_Recv( new ,  width*height, Particlestruct, 0 , MPI_ANY_TAG ,      
-      MPI_COMM_WORLD , &status ) ;
+      ierr = MPI_Recv(new ,1, mpixel, 0 , MPI_ANY_TAG , MPI_COMM_WORLD ,  &status ) ;
+      printf("sended %d\n",ierr  );
+
       }
- free (new) ;
+      free (new) ;
        }
      else
-      { 
-threshold=20;
-    int height1=7016; 
-    int width1=9933;
-      pixel * p1;
-      pixel * new1;
-      p1 = (pixel *)malloc(width1 * height1 * sizeof( pixel ) ) ;
-      new1=(pixel *)malloc(width1 * height1 * sizeof( pixel ) ) ;
-      ierr = MPI_Recv( p1 ,  width1*height1, Particlestruct, 0 , MPI_ANY_TAG ,      
-      MPI_COMM_WORLD , &status ) ;
+      {
+
+        int dataSize ;
+        threshold=20;
+        int height1=7016;
+        int width1=9933;
+
+
+
+          MPI_Probe(0,1,MPI_COMM_WORLD,&status) ;
+          MPI_Get_count(&status,mpixel,&dataSize);
+          printf("datasize = %d \n",dataSize);
+          pixel * p1 = (pixel *)malloc(dataSize * sizeof( pixel) ) ;
+          //double * data=(double *)malloc(dataSize*sizeof(double*)) ;
+        ierr = MPI_Recv(p1 ,dataSize ,mpixel, 0 , MPI_ANY_TAG , MPI_COMM_WORLD, &status ) ;
+        //ierr = MPI_Recv(new ,1 ,mpixel, 0 , MPI_ANY_TAG , MPI_COMM_WORLD , MPI_STATUS_IGNORE ) ;
+
+        printf("recv %d\n",p1[6].r  );
         n_iter = 0 ;
-	int size1=5; 	
+	      int size1=5;
+
       /* Perform at least one blur iteration */
         do
         {
@@ -705,12 +749,14 @@ threshold=20;
                             t_r += p1[CONV(j+stencil_j,k+stencil_k,width1)].r ;
                             t_g += p1[CONV(j+stencil_j,k+stencil_k,width1)].g ;
                             t_b += p1[CONV(j+stencil_j,k+stencil_k,width1)].b ;
+                            //printf("%d\n",p[0][CONV(j+stencil_j,k+stencil_k,width1)].r );
                         }
                     }
-
-                    new1[CONV(j,k,width1)].r = t_r / ( (2*size1+1)*(2*size1+1) ) ;
-                    new1[CONV(j,k,width1)].g = t_g / ( (2*size1+1)*(2*size1+1) ) ;
-                    new1[CONV(j,k,width1)].b = t_b / ( (2*size1+1)*(2*size1+1) ) ;
+                    printf("%d\n",new[0].r );
+                    printf("aaaaa\n" );
+                    //new[CONV(j,k,width)].r = t_r / ( (2*size+1)*(2*size+1) ) ;
+                    //new[CONV(j,k,width)].g = t_g / ( (2*size+1)*(2*size+1) ) ;
+                    //new[CONV(j,k,width)].b = t_b / ( (2*size+1)*(2*size+1) ) ;
                 }
             }
 
@@ -719,9 +765,9 @@ threshold=20;
             {
                 for(k=size1; k<width1-size1; k++)
                 {
-                    new1[CONV(j,k,width1)].r = p1[CONV(j,k,width1)].r ; 
-                    new1[CONV(j,k,width1)].g = p1[CONV(j,k,width1)].g ; 
-                    new1[CONV(j,k,width1)].b = p1[CONV(j,k,width1)].b ; 
+                    new[CONV(j,k,width1)].r = p1[CONV(j,k,width1)].r ;
+                    new[CONV(j,k,width1)].g = p1[CONV(j,k,width1)].g ;
+                    new[CONV(j,k,width1)].b = p1[CONV(j,k,width1)].b ;
                 }
             }
 
@@ -745,9 +791,9 @@ threshold=20;
                         }
                     }
 
-                    new1[CONV(j,k,width1)].r = t_r / ( (2*size1+1)*(2*size1+1) ) ;
-                    new1[CONV(j,k,width1)].g = t_g / ( (2*size1+1)*(2*size1+1) ) ;
-                    new1[CONV(j,k,width1)].b = t_b / ( (2*size1+1)*(2*size1+1) ) ;
+                    new[CONV(j,k,width1)].r = t_r / ( (2*size1+1)*(2*size1+1) ) ;
+                    new[CONV(j,k,width1)].g = t_g / ( (2*size1+1)*(2*size1+1) ) ;
+                    new[CONV(j,k,width1)].b = t_b / ( (2*size1+1)*(2*size1+1) ) ;
                 }
             }
 
@@ -760,11 +806,11 @@ threshold=20;
                     float diff_g ;
                     float diff_b ;
 
-                    diff_r = (new1[CONV(j  ,k  ,width1)].r - p1[CONV(j  ,k  ,width1)].r) ;
-                    diff_g = (new1[CONV(j  ,k  ,width1)].g - p1[CONV(j  ,k  ,width1)].g) ;
-                    diff_b = (new1[CONV(j  ,k  ,width1)].b - p1[CONV(j  ,k  ,width1)].b) ;
+                    diff_r = (new[CONV(j  ,k  ,width1)].r - p1[CONV(j  ,k  ,width1)].r) ;
+                    diff_g = (new[CONV(j  ,k  ,width1)].g - p1[CONV(j  ,k  ,width1)].g) ;
+                    diff_b = (new[CONV(j  ,k  ,width1)].b - p1[CONV(j  ,k  ,width1)].b) ;
 
-                    if ( diff_r > threshold || -diff_r > threshold 
+                    if ( diff_r > threshold || -diff_r > threshold
                             ||
                              diff_g > threshold || -diff_g > threshold
                              ||
@@ -773,22 +819,23 @@ threshold=20;
                         end = 0 ;
                     }
 
-                    p1[CONV(j  ,k  ,width1)].r = new1[CONV(j  ,k  ,width1)].r ;
-                    p1[CONV(j  ,k  ,width1)].g = new1[CONV(j  ,k  ,width1)].g ;
-                    p1[CONV(j  ,k  ,width1)].b = new1[CONV(j  ,k  ,width1)].b ;
+                    p1[CONV(j  ,k  ,width1)].r = new[CONV(j  ,k  ,width1)].r ;
+                    p1[CONV(j  ,k  ,width1)].g = new[CONV(j  ,k  ,width1)].g ;
+                    p1[CONV(j  ,k  ,width1)].b = new[CONV(j  ,k  ,width1)].b ;
                 }
             }
 
         }
         while ( threshold > 0 && !end ) ;
 
-       MPI_Send(new1  , width1*height1 , Particlestruct, 0 , tag , MPI_COMM_WORLD ) ;
+       printf("aaaaa\n" );
+       MPI_Send(new , 1 ,mpixel  , 0 , tag , MPI_COMM_WORLD ) ;
       }
-  
 
 
-       
-    
+
+
+
 
 }
 
@@ -810,7 +857,7 @@ apply_sobel_filter( animated_gif * image )
         pixel * sobel ;
 
         sobel = (pixel *)malloc(width * height * sizeof( pixel ) ) ;
-	
+
         for(j=1; j<height-1; j++)
         {
             for(k=1; k<width-1; k++)
@@ -833,14 +880,14 @@ apply_sobel_filter( animated_gif * image )
                 pixel_blue    = p[i][CONV(j  ,k  ,width)].b ;
                 pixel_blue_e  = p[i][CONV(j  ,k+1,width)].b ;
 
-                deltaX_blue = -pixel_blue_no + pixel_blue_ne - 2*pixel_blue_o + 2*pixel_blue_e - pixel_blue_so + pixel_blue_se;             
+                deltaX_blue = -pixel_blue_no + pixel_blue_ne - 2*pixel_blue_o + 2*pixel_blue_e - pixel_blue_so + pixel_blue_se;
 
                 deltaY_blue = pixel_blue_se + 2*pixel_blue_s + pixel_blue_so - pixel_blue_ne - 2*pixel_blue_n - pixel_blue_no;
 
                 val_blue = sqrt(deltaX_blue * deltaX_blue + deltaY_blue * deltaY_blue)/4;
 
 
-                if ( val_blue > 50 ) 
+                if ( val_blue > 50 )
                 {
                     sobel[CONV(j  ,k  ,width)].r = 255 ;
                     sobel[CONV(j  ,k  ,width)].g = 255 ;
@@ -872,20 +919,23 @@ apply_sobel_filter( animated_gif * image )
 int main( int argc, char ** argv )
 {
 
-    char * input_filename ; 
+    char * input_filename ;
     char * output_filename ;
     animated_gif * image ;
     struct timeval t1, t2;
     double duration ;
-    int ierr;
-    
+    int ierr,size,rank;
+    ierr = MPI_Init( &argc , &argv ) ;
+    ierr = MPI_Comm_rank( MPI_COMM_WORLD , &rank ) ;
+    ierr = MPI_Comm_size( MPI_COMM_WORLD , &size ) ;
+
     if ( argc < 3 )
     {
         fprintf( stderr, "Usage: %s input.gif output.gif \n", argv[0] ) ;
         return 1 ;
     }
-    
-    ierr = MPI_Init( &argc , &argv ) ;
+
+
     input_filename = argv[1] ;
     output_filename = argv[2] ;
 
@@ -901,7 +951,7 @@ int main( int argc, char ** argv )
 
     duration = (t2.tv_sec -t1.tv_sec)+((t2.tv_usec-t1.tv_usec)/1e6);
 
-    printf( "GIF loaded from file %s with %d image(s) in %lf s\n", 
+    printf( "GIF loaded from file %s with %d image(s) in %lf s\n",
             input_filename, image->n_images, duration ) ;
 
     /* FILTER Timer start */
@@ -910,8 +960,10 @@ int main( int argc, char ** argv )
     /* Convert the pixels into grayscale */
     apply_gray_filter( image ) ;
 
+
     /* Apply blur filter with convergence value */
     apply_blur_filter( image, 5, 20 ) ;
+
 
     /* Apply sobel filter on pixels */
     apply_sobel_filter( image ) ;
@@ -935,7 +987,7 @@ int main( int argc, char ** argv )
     duration = (t2.tv_sec -t1.tv_sec)+((t2.tv_usec-t1.tv_usec)/1e6);
 
     printf( "Export done in %lf s in file %s\n", duration, output_filename ) ;
-    
     ierr = MPI_Finalize() ;
+
     return 0 ;
 }
