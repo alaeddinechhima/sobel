@@ -645,10 +645,10 @@ __global__ void blur(pixel * p,pixel *new,int width,int height,int size) {
 
 			for (stencil_k = -size ; stencil_k <= size ; stencil_k++) {
 				if (stencil_k >= 0 && stencil_k < width && stencil_j >= 0 && stencil_j < height) {
-					t_r += p[CONV(i+stencil_j,y+stencil_k,width)].r ;
+					        t_r += p[CONV(i+stencil_j,y+stencil_k,width)].r ;
           				t_g += p[CONV(i+stencil_j,y+stencil_k,width)].g ;
           				t_b += p[CONV(i+stencil_j,y+stencil_k,width)].b ;
-					num++;
+
 				}
 			}
 
