@@ -688,7 +688,7 @@ apply_blur_filter( animated_gif * image, int size, int threshold )
 
         ierr = MPI_Send(p[i],height*width, mpixel, dest , tag , MPI_COMM_WORLD ) ;
 
-          printf("sended %d\n",p[i][5].r  );
+        //  printf("sended %d\n",p[i][5].r  );
 
 
 
@@ -699,7 +699,7 @@ apply_blur_filter( animated_gif * image, int size, int threshold )
     for ( i = 0 ; i < image->n_images ; i++ )
      {
       ierr = MPI_Recv(new ,1, mpixel, 0 , MPI_ANY_TAG , MPI_COMM_WORLD ,  &status ) ;
-      printf("sended %d\n",ierr  );
+      //printf("sended %d\n",ierr  );
 
       }
       free (new) ;
@@ -716,13 +716,13 @@ apply_blur_filter( animated_gif * image, int size, int threshold )
 
           MPI_Probe(0,1,MPI_COMM_WORLD,&status) ;
           MPI_Get_count(&status,mpixel,&dataSize);
-          printf("datasize = %d \n",dataSize);
+          //printf("datasize = %d \n",dataSize);
           pixel * p1 = (pixel *)malloc(dataSize * sizeof( pixel) ) ;
           //double * data=(double *)malloc(dataSize*sizeof(double*)) ;
         ierr = MPI_Recv(p[0] ,dataSize ,mpixel, 0 , MPI_ANY_TAG , MPI_COMM_WORLD, &status ) ;
         //ierr = MPI_Recv(new ,1 ,mpixel, 0 , MPI_ANY_TAG , MPI_COMM_WORLD , MPI_STATUS_IGNORE ) ;
         p1=p[0];
-        printf("recv %d\n",p1[5].r  );
+        //printf("recv %d\n",p1[5].r  );
         n_iter = 0 ;
 	      int size1=5;
         new=p1 ;
@@ -733,22 +733,22 @@ apply_blur_filter( animated_gif * image, int size, int threshold )
             n_iter++ ;
 
             /* Apply blur on top part of image (10%) */
-            for(j=size1; j<height1/10-size1; j++)
+            for(j=size; j<height/10-size; j++)
             {
-                for(k=size1; k<width1-size1; k++)
+                for(k=size; k<width-size; k++)
                 {
                     int stencil_j, stencil_k ;
                     int t_r = 0 ;
                     int t_g = 0 ;
                     int t_b = 0 ;
 
-                    for ( stencil_j = -size1 ; stencil_j <= size1 ; stencil_j++ )
+                    for ( stencil_j = -size ; stencil_j <= size ; stencil_j++ )
                     {
-                        for ( stencil_k = -size1 ; stencil_k <= size1 ; stencil_k++ )
+                        for ( stencil_k = -size ; stencil_k <= size ; stencil_k++ )
                         {
-                            t_r += p1[CONV(j+stencil_j,k+stencil_k,width1)].r ;
-                            t_g += p1[CONV(j+stencil_j,k+stencil_k,width1)].g ;
-                            t_b += p1[CONV(j+stencil_j,k+stencil_k,width1)].b ;
+                            t_r += p1[CONV(j+stencil_j,k+stencil_k,width)].r ;
+                            t_g += p1[CONV(j+stencil_j,k+stencil_k,width)].g ;
+                            t_b += p1[CONV(j+stencil_j,k+stencil_k,width)].b ;
                             //printf("%d\n",p[0][CONV(j+stencil_j,k+stencil_k,width1)].r );
                         }
                     }
@@ -761,29 +761,29 @@ apply_blur_filter( animated_gif * image, int size, int threshold )
             }
 
             /* Copy the middle part of the image */
-            for(j=height1/10-size1; j<height1*0.9+size1; j++)
+            for(j=height/10-size; j<height*0.9+size; j++)
             {
-                for(k=size1; k<width1-size1; k++)
+                for(k=size; k<width-size; k++)
                 {
-                    new[CONV(j,k,width1)].r = p1[CONV(j,k,width1)].r ;
-                    new[CONV(j,k,width1)].g = p1[CONV(j,k,width1)].g ;
-                    new[CONV(j,k,width1)].b = p1[CONV(j,k,width1)].b ;
+                    new[CONV(j,k,width)].r = p1[CONV(j,k,width)].r ;
+                    new[CONV(j,k,width)].g = p1[CONV(j,k,width)].g ;
+                    new[CONV(j,k,width)].b = p1[CONV(j,k,width)].b ;
                 }
             }
 
             /* Apply blur on the bottom part of the image (10%) */
-            for(j=height1*0.9+size1; j<height1-size1; j++)
+            for(j=height*0.9+size; j<height-size; j++)
             {
-                for(k=size1; k<width1-size1; k++)
+                for(k=size; k<width-size; k++)
                 {
                     int stencil_j, stencil_k ;
                     int t_r = 0 ;
                     int t_g = 0 ;
                     int t_b = 0 ;
 
-                    for ( stencil_j = -size1 ; stencil_j <= size1 ; stencil_j++ )
+                    for ( stencil_j = -size ; stencil_j <= size ; stencil_j++ )
                     {
-                        for ( stencil_k = -size1 ; stencil_k <= size1 ; stencil_k++ )
+                        for ( stencil_k = -size ; stencil_k <= size ; stencil_k++ )
                         {
                             t_r += p1[CONV(j+stencil_j,k+stencil_k,width1)].r ;
                             t_g += p1[CONV(j+stencil_j,k+stencil_k,width1)].g ;
@@ -791,24 +791,24 @@ apply_blur_filter( animated_gif * image, int size, int threshold )
                         }
                     }
 
-                    new[CONV(j,k,width1)].r = t_r / ( (2*size1+1)*(2*size1+1) ) ;
-                    new[CONV(j,k,width1)].g = t_g / ( (2*size1+1)*(2*size1+1) ) ;
-                    new[CONV(j,k,width1)].b = t_b / ( (2*size1+1)*(2*size1+1) ) ;
+                    new[CONV(j,k,width)].r = t_r / ( (2*size+1)*(2*size+1) ) ;
+                    new[CONV(j,k,width)].g = t_g / ( (2*size+1)*(2*size+1) ) ;
+                    new[CONV(j,k,width)].b = t_b / ( (2*size+1)*(2*size+1) ) ;
                 }
             }
 
-            for(j=1; j<height1-1; j++)
+            for(j=1; j<height-1; j++)
             {
-                for(k=1; k<width1-1; k++)
+                for(k=1; k<width-1; k++)
                 {
 
                     float diff_r ;
                     float diff_g ;
                     float diff_b ;
 
-                    diff_r = (new[CONV(j  ,k  ,width1)].r - p1[CONV(j  ,k  ,width1)].r) ;
-                    diff_g = (new[CONV(j  ,k  ,width1)].g - p1[CONV(j  ,k  ,width1)].g) ;
-                    diff_b = (new[CONV(j  ,k  ,width1)].b - p1[CONV(j  ,k  ,width1)].b) ;
+                    diff_r = (new[CONV(j  ,k  ,width)].r - p1[CONV(j  ,k  ,width)].r) ;
+                    diff_g = (new[CONV(j  ,k  ,width)].g - p1[CONV(j  ,k  ,width)].g) ;
+                    diff_b = (new[CONV(j  ,k  ,width)].b - p1[CONV(j  ,k  ,width)].b) ;
 
                     if ( diff_r > threshold || -diff_r > threshold
                             ||
@@ -819,9 +819,9 @@ apply_blur_filter( animated_gif * image, int size, int threshold )
                         end = 0 ;
                     }
 
-                    p1[CONV(j  ,k  ,width1)].r = new[CONV(j  ,k  ,width1)].r ;
-                    p1[CONV(j  ,k  ,width1)].g = new[CONV(j  ,k  ,width1)].g ;
-                    p1[CONV(j  ,k  ,width1)].b = new[CONV(j  ,k  ,width1)].b ;
+                    p1[CONV(j  ,k  ,width)].r = new[CONV(j  ,k  ,width)].r ;
+                    p1[CONV(j  ,k  ,width)].g = new[CONV(j  ,k  ,width)].g ;
+                    p1[CONV(j  ,k  ,width)].b = new[CONV(j  ,k  ,width)].b ;
                 }
             }
 
