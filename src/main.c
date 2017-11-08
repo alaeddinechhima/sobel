@@ -703,7 +703,7 @@ apply_blur_filter( animated_gif * image, int size, int threshold )
             conv<<<blockD, gridD>>>(p_gpu,new_gpu, width_gpu,height_gpu,size_gpu);
 
 
-            //cudaMemcpy(p[i],p_gpu,size_new,cudaMemcpyDeviceToHost);
+            //  cudaMemcpy(p[i],p_gpu,size_new,cudaMemcpyDeviceToHost);
             cudaMemcpy(new,new_gpu,size_new,cudaMemcpyDeviceToHost);
             //#pragma omp parallel for omp_set_num_threads(7) schedule(dynamic)
             for(j=1; j<height-1; j++)
