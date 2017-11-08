@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <sys/time.h>
-
+#include <omp.h>
 #include <gif_lib.h>
 
 #define SOBELF_DEBUG 0
@@ -637,8 +637,9 @@ apply_blur_filter( animated_gif * image, int size, int threshold )
     /* Get the pixels of all images */
     p = image->p ;
 
-
+    omp_set_num_threads(4) ;
     /* Process all images */
+    #pragma omp parallel for schedule(static,5) 
     for ( i = 0 ; i < image->n_images ; i++ )
     {
         n_iter = 0 ;
@@ -655,6 +656,8 @@ apply_blur_filter( animated_gif * image, int size, int threshold )
             n_iter++ ;
 
             /* Apply blur on top part of image (10%) */
+            
+            #pragma omp parallel for schedule(static)  
             for(j=size; j<height/10-size; j++)
             {
                 for(k=size; k<width-size; k++)
@@ -664,6 +667,7 @@ apply_blur_filter( animated_gif * image, int size, int threshold )
                     int t_g = 0 ;
                     int t_b = 0 ;
 
+                 #pragma omp parallel for schedule(static) collapse(2) 
                     for ( stencil_j = -size ; stencil_j <= size ; stencil_j++ )
                     {
                         for ( stencil_k = -size ; stencil_k <= size ; stencil_k++ )
@@ -681,6 +685,7 @@ apply_blur_filter( animated_gif * image, int size, int threshold )
             }
 
             /* Copy the middle part of the image */
+            #pragma omp parallel for schedule(static) collapse(2)
             for(j=height/10-size; j<height*0.9+size; j++)
             {
                 for(k=size; k<width-size; k++)
@@ -692,6 +697,7 @@ apply_blur_filter( animated_gif * image, int size, int threshold )
             }
 
             /* Apply blur on the bottom part of the image (10%) */
+            #pragma omp parallel for schedule(static) 
             for(j=height*0.9+size; j<height-size; j++)
             {
                 for(k=size; k<width-size; k++)
@@ -700,7 +706,8 @@ apply_blur_filter( animated_gif * image, int size, int threshold )
                     int t_r = 0 ;
                     int t_g = 0 ;
                     int t_b = 0 ;
-
+                    
+                    #pragma omp parallel for  collapse(2)
                     for ( stencil_j = -size ; stencil_j <= size ; stencil_j++ )
                     {
                         for ( stencil_k = -size ; stencil_k <= size ; stencil_k++ )
@@ -717,6 +724,7 @@ apply_blur_filter( animated_gif * image, int size, int threshold )
                 }
             }
 
+            #pragma omp parallel for  schedule(static) collapse(2)
             for(j=1; j<height-1; j++)
             {
                 for(k=1; k<width-1; k++)
